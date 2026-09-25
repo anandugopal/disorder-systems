@@ -1,10 +1,17 @@
 import { useState, type CSSProperties } from 'react'
 import { Dithering } from '@paper-design/shaders-react'
 
-const PREVIEWS: { image?: string; alt?: string }[] = [
-  {},
-  { image: '/peak-love.jpg', alt: 'Peak Love website — black and white mountain range' },
-  {},
+const PREVIEWS: { image: string; alt: string }[] = [
+  { image: '/projects/home-orange.jpg', alt: 'Peak Love — home, Mountain Mist in orange' },
+  { image: '/projects/home-mist.jpg', alt: 'Peak Love — home, black and white mountain range' },
+  { image: '/projects/home-kilimanjaro.jpg', alt: 'Peak Love — home, Kilimanjaro in yellow' },
+  { image: '/projects/product-huangshin.jpg', alt: 'Peak Love — Mountain Mist product page' },
+  { image: '/projects/product-huangshin-story.jpg', alt: 'Peak Love — Huangshin product story' },
+  { image: '/projects/product-annapurna.jpg', alt: 'Peak Love — Annapurna packaging' },
+  { image: '/projects/shop.jpg', alt: 'Peak Love — shop grid' },
+  { image: '/projects/product-dark.jpg', alt: 'Peak Love — Kilimanjaro bottle on black' },
+  { image: '/projects/product-kilimanjaro.jpg', alt: 'Peak Love — Kilimanjaro product explorer' },
+  { image: '/projects/product-kilimanjaro-detail.jpg', alt: 'Peak Love — Kilimanjaro editorial detail' },
 ]
 
 export default function App() {
@@ -63,7 +70,7 @@ export default function App() {
               aria-label={`Preview ${i + 1}`}
               aria-current={i === active}
             >
-              {p.image && <img src={p.image} alt={p.alt} />}
+              <img src={p.image} alt={p.alt} decoding="async" />
             </button>
           ))}
         </div>

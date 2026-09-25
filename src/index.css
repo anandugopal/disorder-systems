@@ -209,6 +209,7 @@ a {
   width: 58.77%;
   height: 54.67%;
   object-fit: cover;
+  object-position: top;
   box-shadow: #0000000d 0 1px 4px, #0000000d 0 0 0 1px;
 }
 
@@ -222,7 +223,9 @@ a {
   align-items: center;
   gap: 16px;
   padding: 10px 14px;
-  background: var(--paper);
+  background: color-mix(in srgb, var(--paper) 55%, transparent);
+  -webkit-backdrop-filter: blur(16px) saturate(1.2);
+  backdrop-filter: blur(16px) saturate(1.2);
 }
 
 .scrubber-count {
@@ -230,12 +233,12 @@ a {
   line-height: 16px;
   letter-spacing: 0.02em;
   font-variant-numeric: tabular-nums;
-  opacity: 0.6;
+  opacity: 0.75;
 }
 
 .scrubber input {
   --track: linear-gradient(var(--ink-block), var(--ink-block)) 0 50% / var(--p) 1px no-repeat,
-    linear-gradient(var(--rule), var(--rule)) 0 50% / 100% 1px no-repeat;
+    linear-gradient(#00000033, #00000033) 0 50% / 100% 1px no-repeat;
   width: 200px;
   height: 16px;
   margin: 0;
