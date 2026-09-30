@@ -1,96 +1,81 @@
-import { useState, type CSSProperties } from 'react'
-import { Dithering } from '@paper-design/shaders-react'
+import { useState } from 'react'
+import { SwarmCanvas } from './SwarmCanvas'
 
-const PREVIEWS: { image: string; alt: string }[] = [
-  { image: '/projects/home-orange.jpg', alt: 'Peak Love — home, Mountain Mist in orange' },
-  { image: '/projects/home-mist.jpg', alt: 'Peak Love — home, black and white mountain range' },
-  { image: '/projects/home-kilimanjaro.jpg', alt: 'Peak Love — home, Kilimanjaro in yellow' },
-  { image: '/projects/product-huangshin.jpg', alt: 'Peak Love — Mountain Mist product page' },
-  { image: '/projects/product-huangshin-story.jpg', alt: 'Peak Love — Huangshin product story' },
-  { image: '/projects/product-annapurna.jpg', alt: 'Peak Love — Annapurna packaging' },
-  { image: '/projects/shop.jpg', alt: 'Peak Love — shop grid' },
-  { image: '/projects/product-dark.jpg', alt: 'Peak Love — Kilimanjaro bottle on black' },
-  { image: '/projects/product-kilimanjaro.jpg', alt: 'Peak Love — Kilimanjaro product explorer' },
-  { image: '/projects/product-kilimanjaro-detail.jpg', alt: 'Peak Love — Kilimanjaro editorial detail' },
+const ABOUT = [
+  'Disorder Systems is a pluralistic collective working with type, new media, and generative principles on the web. We are interested in what happens when the unconventional arises. Our practice moves between typography, code, motion, identity, and interaction—building visual languages that can shift, mutate, and respond.',
+  "Our methodology use rules to create variation, code to introduce behaviour, and disorder to make space for the unexpected. The work exists somewhere between graphic design and computation: identities that behave, websites that change, type that moves, and systems that refuse to settle into one form. Disorder Systems is a place for making things that don't quite behave.",
 ]
 
+// Only one panel is open at a time; opening one closes the other. Clicking the open one closes it.
+type Panel = 'intro' | 'about'
+
 export default function App() {
-  const [active, setActive] = useState(1)
-  const last = PREVIEWS.length - 1
+  const [selected, setSelected] = useState<Panel | null>('intro')
+  const toggle = (panel: Panel) => setSelected((cur) => (cur === panel ? null : panel))
+  const open = selected === 'intro'
+  const aboutOpen = selected === 'about'
 
   return (
     <main className="site">
-      <div className="panels">
-        <nav className="panel nav">
-          <a href="/" className="nav-home">
-            <span className="mark" />
-            <span className="label">Home</span>
-          </a>
-          <div className="nav-bottom">
-            <div className="nav-links">
-              <a href="#swipe-file" className="label">Swipe file</a>
-              <a href="#experiments" className="label">Experiments</a>
+      <SwarmCanvas />
+
+      <div className="ui" data-swarm-ignore>
+        <div className="ui-top">
+          <section className={`glass card${open ? '' : ' is-closed'}`}>
+            <header className="card-head">
+              <h1 className="card-title">Disorder Systems</h1>
+              <button
+                type="button"
+                className={`icon icon-toggle${open ? ' is-open' : ''}`}
+                onClick={() => toggle('intro')}
+                aria-expanded={open}
+                aria-label={open ? 'Collapse intro' : 'Expand intro'}
+              />
+            </header>
+            <div className={`collapse${open ? ' is-open' : ''}`} inert={!open}>
+              <div className="collapse-inner">
+                <p className="card-body">
+                  We are a full-cycle creative studio for technology companies. Experimental creative
+                  studio creating one-of-a-kind identities, web and product for startups who wants
+                  truely unique identity rather than ai slop
+                </p>
+              </div>
             </div>
-            <a href="#book-a-call" className="label">Book a call</a>
-          </div>
-        </nav>
+          </section>
 
-        <section className="panel intro">
-          <div className="intro-top">
-            <h1 className="headline">
-              Disorder Systems is a full-cycle creative studio for technology companies.
-            </h1>
-            <p className="body muted">
-              Experimental creative studio creating one-of-a-kind identities, web and product
-              for startups who wants truely unique identity rather than ai slop
-            </p>
-          </div>
-          <a href="#about" className="body underline">More about us and our vision</a>
-        </section>
-      </div>
-
-      <section className="showcase" aria-label="Selected work">
-        <Dithering
-          className="dither"
-          speed={2}
-          shape="swirl"
-          type="8x8"
-          size={3.7}
-          scale={0.11}
-          colorBack="#00000000"
-          colorFront="#657A90"
-        />
-        <div className="reel" style={{ '--i': active } as CSSProperties}>
-          {PREVIEWS.map((p, i) => (
+          <section className={`glass pill-panel${aboutOpen ? ' is-open' : ''}`}>
             <button
-              key={i}
               type="button"
-              className={`slide${i === active ? ' is-active' : ''}`}
-              onClick={() => setActive(i)}
-              aria-label={`Preview ${i + 1}`}
-              aria-current={i === active}
+              className="pill-head"
+              onClick={() => toggle('about')}
+              aria-expanded={aboutOpen}
+              aria-controls="about"
             >
-              <img src={p.image} alt={p.alt} decoding="async" />
+              <span>More about us</span>
+              <span className={`icon icon-toggle${aboutOpen ? ' is-open' : ''}`} aria-hidden="true" />
             </button>
-          ))}
+            <div className={`collapse${aboutOpen ? ' is-open' : ''}`} inert={!aboutOpen}>
+              <div className="collapse-inner">
+                <div id="about" className="pill-body">
+                  {ABOUT.map((p) => (
+                    <p key={p.slice(0, 24)}>{p}</p>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <a href="#work" className="glass pill">
+            <span>Work</span>
+            <span className="icon icon-plus" aria-hidden="true" />
+          </a>
         </div>
 
-        <div className="scrubber">
-          <input
-            type="range"
-            min={0}
-            max={last}
-            step={1}
-            value={active}
-            onChange={(e) => setActive(Number(e.target.value))}
-            style={{ '--p': `${(active / last) * 100}%` } as CSSProperties}
-            aria-label="Browse previews"
-          />
-          <span className="scrubber-count">
-            {String(active + 1).padStart(2, '0')} / {String(PREVIEWS.length).padStart(2, '0')}
-          </span>
-        </div>
-      </section>
+        <a href="#contact" className="glass pill">
+          <span>Contact</span>
+          <span className="icon icon-plus" aria-hidden="true" />
+        </a>
+      </div>
     </main>
   )
 }

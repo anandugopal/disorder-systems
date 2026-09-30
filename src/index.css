@@ -1,11 +1,27 @@
+/* Greed is a trial font installed on this machine; local() only, so it isn't bundled or
+   redistributed. Visitors without it get the condensed system fallback. */
+@font-face {
+  font-family: 'Greed Condensed';
+  src: local('Greed Condensed-TRIAL Regular'), local('GreedCondensed-TRIAL-Regular'),
+    local('GreedCondensed-Regular-TRIAL');
+  font-weight: 400;
+}
+@font-face {
+  font-family: 'Greed Narrow';
+  src: local('Greed Narrow-TRIAL Regular'), local('GreedNarrow-TRIAL-Regular'),
+    local('GreedNarrow-Regular-TRIAL');
+  font-weight: 400;
+}
+
 :root {
-  --paper: #fffbf8;
-  --card: #fffbf9;
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  --dur: 480ms;
   --ink: #000000;
-  --ink-block: #282828;
-  --steel: #657a90;
-  --rule: #0000001a;
-  --font: 'HelveticaNeue', 'Helvetica Neue', system-ui, sans-serif;
+  --ink-muted: #00000066;
+  --font-display: 'Greed Condensed', 'Helvetica Neue', system-ui, sans-serif;
+  --font-ui: 'Greed Narrow', 'Helvetica Neue', system-ui, sans-serif;
+  --glass-edge: #ffffff99 0 0 0 1px inset, #0000000d 0 0 0 1px;
 }
 
 *,
@@ -22,9 +38,8 @@ body,
 }
 
 body {
-  background: var(--ink-block);
+  background: #ffffff;
   color: var(--ink);
-  font-family: var(--font);
   font-synthesis: none;
   overflow-wrap: anywhere;
   -webkit-font-smoothing: antialiased;
@@ -36,267 +51,285 @@ a {
   text-decoration: none;
 }
 
+button {
+  font: inherit;
+  color: inherit;
+  background: none;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+}
+
 .site {
-  display: flex;
-  align-items: stretch;
-  height: 100vh;
-  min-height: 640px;
-  overflow: clip;
-}
-
-/* Left: paper panels */
-.panels {
-  display: flex;
-  flex-shrink: 0;
-  box-shadow: #0000007a 0 0 12px, var(--rule) 0 0 0 1px;
   position: relative;
-  z-index: 1;
+  height: 100vh;
+  height: 100dvh;
+  overflow: hidden;
 }
 
-.panel {
+.swarm {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+  touch-action: none;
+  /* The brush layer paints its own pencil crosshair here (cursorOn); the UI keeps the normal pointer. */
+  cursor: none;
+}
+
+/* UI column: intro + links at the top, contact pinned to the bottom.
+   The column itself lets pointer events through so the swarm stays interactive around it. */
+.ui {
+  position: absolute;
+  inset: 0 auto 0 0;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  padding: 24px;
-  background: var(--paper);
-  box-shadow: #ffffff -1px 0 0 inset;
+  align-items: flex-start;
+  padding: 20px;
+  pointer-events: none;
 }
 
-.nav {
-  width: 261px;
-  border-right: 1px solid var(--rule);
-}
-
-.intro {
-  width: 368px;
-}
-
-.label {
-  font-size: 13px;
-  line-height: 16px;
-}
-
-.nav-home {
+.ui-top {
   display: flex;
-  align-items: start;
-  gap: 8px;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
 }
 
-.nav-home .mark {
-  width: 12px;
-  height: 16px;
+.glass {
+  pointer-events: auto;
+  border-radius: 1px;
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+  box-shadow: var(--glass-edge);
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  width: 292px;
+  padding: 10px 10px 12px;
+  background: linear-gradient(in oklab 180deg, oklab(100% 0 0 / 10%) 0%, oklab(94.9% 0 0 / 50%) 100%);
+  box-shadow: #ffffff99 0 0 0 1px inset, #0000000d 0 1px 4px, #0000000d 0 0 0 1px;
+}
+
+.card {
+  transition: padding var(--dur) var(--ease-in-out);
+}
+
+.card.is-closed {
+  padding-bottom: 10px;
+}
+
+
+.card-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 4px;
+}
+
+.card-title {
+  font-family: var(--font-display);
+  font-size: 24px;
+  font-weight: 400;
+  font-stretch: condensed;
+  letter-spacing: -0.01em;
+  line-height: 110%;
+}
+
+.card-body {
+  /* Title→text spacing lives inside the collapsing area, so a closed card is evenly padded. */
+  padding-top: 4px;
+  font-family: var(--font-display);
+  font-size: 16px;
+  font-stretch: condensed;
+  letter-spacing: -0.01em;
+  line-height: 110%;
+  color: var(--ink-muted);
+}
+
+.pill {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 160px;
+  padding: 8px 10px;
+  background: #ffffff66;
+  font-family: var(--font-ui);
+  font-size: 14px;
+  font-stretch: semi-condensed;
+  line-height: 14px;
+  transition: background-color 0.15s;
+}
+
+.pill:hover {
+  background: #ffffffb3;
+}
+
+/* Expandable pill ("More about us"): a pill when closed; opens to the intro card's width
+   with the text set like the intro body. */
+.pill-panel {
+  display: flex;
+  flex-direction: column;
+  width: 160px;
+  overflow: clip;
+  background: #ffffff66;
+  transition:
+    width var(--dur) var(--ease-in-out),
+    background-color 0.25s;
+}
+
+.pill-panel:hover,
+.pill-panel.is-open {
+  background: #ffffffb3;
+}
+
+.pill-panel.is-open {
+  width: 292px;
+}
+
+.pill-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 8px 10px;
+  font-family: var(--font-ui);
+  font-size: 14px;
+  font-stretch: semi-condensed;
+  line-height: 14px;
+  text-align: left;
+  transition:
+    font-size var(--dur) var(--ease-in-out),
+    line-height var(--dur) var(--ease-in-out),
+    letter-spacing var(--dur) var(--ease-in-out),
+    padding var(--dur) var(--ease-in-out);
+}
+
+/* Expanded panels share the intro card's type scale and padding (24px title, 16px body,
+   10px sides/top, 12px bottom). The title keeps its own typeface, so opening and closing
+   only scale it — the font never swaps. */
+.pill-panel.is-open .pill-head {
+  padding: 10px 10px 0;
+  font-size: 24px;
+  letter-spacing: -0.01em;
+  line-height: 26.4px;
+}
+
+.pill-body {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  /* Fixed to the open width so the text doesn't re-wrap while the panel widens. */
+  width: 292px;
+  max-height: calc(100dvh - 350px);
+  overflow-y: auto;
+  padding: 4px 10px 12px;
+  font-family: var(--font-display);
+  font-size: 16px;
+  font-stretch: condensed;
+  letter-spacing: -0.01em;
+  line-height: 110%;
+  color: var(--ink-muted);
+}
+
+/* ---- Expand / collapse
+   Height animates via grid rows 0fr → 1fr (no measured heights). Opening: the panel grows,
+   then the text fades and drifts in. Closing: the text fades out fast, then the panel folds. */
+.collapse {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows var(--dur) var(--ease-in-out);
+}
+
+.collapse.is-open {
+  grid-template-rows: 1fr;
+}
+
+.collapse-inner {
+  min-height: 0;
+  overflow: hidden;
+}
+
+.collapse-inner > * {
+  opacity: 0;
+  translate: 0 -6px;
+  filter: blur(2px);
+  transition:
+    opacity 160ms ease-out,
+    translate 160ms ease-out,
+    filter 160ms ease-out;
+}
+
+.collapse.is-open .collapse-inner > * {
+  opacity: 1;
+  translate: 0 0;
+  filter: blur(0);
+  transition:
+    opacity 380ms var(--ease-out) 140ms,
+    translate 480ms var(--ease-out) 140ms,
+    filter 380ms var(--ease-out) 140ms;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .collapse,
+  .collapse-inner > *,
+  .pill-panel,
+  .card,
+  .icon::before,
+  .icon::after {
+    transition: none !important;
+  }
+}
+
+/* 14px plus / minus built from two 1×10 strokes, at 40% ink */
+.icon {
+  position: relative;
   flex-shrink: 0;
-  background: var(--ink-block);
-}
-
-.nav-home .label {
-  opacity: 0.8;
-}
-
-.nav-bottom {
-  display: flex;
-  flex-direction: column;
-  gap: 48px;
-}
-
-.nav-links {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.nav-links a {
-  opacity: 0.6;
+  width: 14px;
+  height: 14px;
+  opacity: 0.4;
   transition: opacity 0.15s;
 }
 
-.nav-links a:hover,
-.nav-home:hover .label {
+.icon::before,
+.icon::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 1px;
+  height: 10px;
+  background: var(--ink);
+  translate: -50% -50%;
+}
+
+.icon-plus::after,
+.icon-toggle::after {
+  rotate: 90deg;
+}
+
+/* Toggle: the vertical stroke turns flat, so + folds into − (and back). */
+.icon-toggle::before {
+  transition: rotate var(--dur) var(--ease-in-out);
+}
+
+.icon-toggle.is-open::before {
+  rotate: 90deg;
+}
+
+button.icon:hover,
+.pill:hover .icon,
+.pill-head:hover .icon {
   opacity: 1;
 }
 
-.intro-top {
-  display: flex;
-  flex-direction: column;
-  gap: 24px;
-}
-
-.headline {
-  font-size: 24px;
-  font-weight: 400;
-  line-height: 28px;
-  letter-spacing: -0.01em;
-}
-
-.body {
-  font-size: 13px;
-  line-height: 140%;
-  letter-spacing: 0.02em;
-}
-
-.muted {
-  opacity: 0.6;
-}
-
-.underline {
-  text-decoration: underline 1px var(--rule);
-  text-underline-offset: 6px;
-  text-wrap: pretty;
-  transition: text-decoration-color 0.15s;
-}
-
-.underline:hover {
-  text-decoration-color: currentColor;
-}
-
-/* Right: dithered showcase */
-.showcase {
-  --main-w: 701px;
-  --main-h: 492px;
-  --side-w: 488px;
-  --side-h: 343px;
-  --gap: 24px;
-  --ease: cubic-bezier(0.22, 1, 0.36, 1);
-  position: relative;
-  flex: 1;
-  min-width: 0;
-  overflow: clip;
-}
-
-.dither {
-  position: absolute;
-  inset: 0;
-}
-
-/* Reel: the active slide is kept centred; every slide before it is side-sized */
-.reel {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  display: flex;
-  align-items: center;
-  gap: var(--gap);
-  transform: translate(
-    calc(-1 * (var(--i) * (var(--side-w) + var(--gap)) + var(--main-w) / 2)),
-    -50%
-  );
-  transition: transform 0.6s var(--ease);
-}
-
-.slide {
-  position: relative;
-  flex-shrink: 0;
-  width: var(--side-w);
-  height: var(--side-h);
-  padding: 0;
-  border: 0;
-  background: var(--card);
-  overflow: clip;
-  cursor: pointer;
-  transition: width 0.6s var(--ease), height 0.6s var(--ease);
-}
-
-.slide.is-active {
-  width: var(--main-w);
-  height: var(--main-h);
-  cursor: default;
-}
-
-.slide img {
-  position: absolute;
-  top: 22.66%;
-  left: 20.68%;
-  width: 58.77%;
-  height: 54.67%;
-  object-fit: cover;
-  object-position: top;
-  box-shadow: #0000000d 0 1px 4px, #0000000d 0 0 0 1px;
-}
-
-/* Scrubber: sits just under the active slide */
-.scrubber {
-  position: absolute;
-  top: calc(50% + var(--main-h) / 2 + 24px);
-  left: 50%;
-  transform: translateX(-50%);
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  padding: 10px 14px;
-  background: color-mix(in srgb, var(--paper) 55%, transparent);
-  -webkit-backdrop-filter: blur(16px) saturate(1.2);
-  backdrop-filter: blur(16px) saturate(1.2);
-}
-
-.scrubber-count {
-  font-size: 13px;
-  line-height: 16px;
-  letter-spacing: 0.02em;
-  font-variant-numeric: tabular-nums;
-  opacity: 0.75;
-}
-
-.scrubber input {
-  --track: linear-gradient(var(--ink-block), var(--ink-block)) 0 50% / var(--p) 1px no-repeat,
-    linear-gradient(#00000033, #00000033) 0 50% / 100% 1px no-repeat;
-  width: 200px;
-  height: 16px;
-  margin: 0;
-  background: var(--track);
-  cursor: pointer;
-  appearance: none;
-  -webkit-appearance: none;
-}
-
-.scrubber input::-webkit-slider-thumb {
-  width: 12px;
-  height: 16px;
-  border: 0;
-  border-radius: 0;
-  background: var(--ink-block);
-  -webkit-appearance: none;
-}
-
-.scrubber input::-moz-range-thumb {
-  width: 12px;
-  height: 16px;
-  border: 0;
-  border-radius: 0;
-  background: var(--ink-block);
-}
-
-.scrubber input:focus-visible {
-  outline: 1px solid var(--steel);
-  outline-offset: 6px;
-}
-
-@media (max-width: 1100px) {
-  .site {
-    flex-direction: column;
-    height: auto;
-    overflow: visible;
-  }
-
-  .panels {
-    flex-direction: column;
-  }
-
-  .nav,
-  .intro {
-    width: 100%;
-    gap: 48px;
-    border-right: 0;
-  }
-
-  .nav {
-    border-bottom: 1px solid var(--rule);
-  }
-
-  .showcase {
-    min-height: 70vh;
-    --main-w: min(701px, calc(100vw - 32px));
-    --main-h: calc(var(--main-w) * 492 / 701);
-    --side-w: calc(var(--main-w) * 488 / 701);
-    --side-h: calc(var(--main-h) * 343 / 492);
-  }
+button.icon:focus-visible,
+.pill:focus-visible,
+.pill-head:focus-visible {
+  outline: 1px solid var(--ink);
+  outline-offset: 2px;
 }
